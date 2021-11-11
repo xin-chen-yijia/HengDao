@@ -1,0 +1,17 @@
+# vs
+.vs
+*.sln
+*.csproj
+
+# unity
+Temp
+Library
+Logs
+obj
+
+# build
+*.apk
+
+# exe
+*.exe
+*_data
