@@ -21,7 +21,7 @@ namespace HengDao
         {
             if(!System.IO.File.Exists(configPath))
             {
-                Logger.Log(configPath + " not exists...");
+                Debug.LogError(configPath + " not exists...");
                 return false;
             }
 
@@ -39,7 +39,7 @@ namespace HengDao
         {
             if (assetLoader_ == null)
             {
-                Logger.Error("ABManager Not Initialize...");
+                Debug.LogError("ABManager Not Initialize...");
             }
             return assetLoader_;
         }

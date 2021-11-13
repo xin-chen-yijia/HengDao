@@ -54,7 +54,7 @@ namespace HengDao
                 return t;
             }
 
-            Logger.Error(string.Format("LoadAsset Error.bundleName:{0},assetName:{1}", bundleName, assetName));
+            Debug.LogError(string.Format("LoadAsset Error.bundleName:{0},assetName:{1}", bundleName, assetName));
             return null;
         }
 
@@ -115,7 +115,7 @@ namespace HengDao
         {
             if(!System.IO.File.Exists(mPath + "/" + name + "/" + name))
             {
-                Logger.Error("not exist assetbundle:" + name);
+                Debug.LogError("not exist assetbundle:" + name);
                 return null;
             }
             if(!contexts_.ContainsKey(name))
@@ -188,7 +188,7 @@ namespace HengDao
             yield return ab;
             if (ab == null)
             {
-                Logger.Log("Load AssetBundle " + bundlePath + " Fail...");
+                Debug.Log("Load AssetBundle " + bundlePath + " Fail...");
                 yield break;
             }
 

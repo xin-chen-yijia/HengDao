@@ -39,7 +39,7 @@ namespace HengDao
             }
             else
             {
-                Logger.Error(bundleName + " can't found..");
+                Debug.LogError(bundleName + " can't found..");
             }
         }
 
@@ -57,12 +57,12 @@ namespace HengDao
                 }
                 else
                 {
-                    Logger.Error("LoadAsset:setName get is empty.. assetName:" + assetName);
+                    Debug.LogError("LoadAsset:setName get is empty.. assetName:" + assetName);
                 }
             }
             else
             {
-                Logger.Error("LoadAsset:GetAssetOwnerInfo Error.. assetName:" +assetName);
+                Debug.LogError("LoadAsset:GetAssetOwnerInfo Error.. assetName:" +assetName);
             }
 
             return null;
@@ -82,12 +82,12 @@ namespace HengDao
                 }
                 else
                 {
-                    Logger.Error("LoadAndInstantiateAsset:setName get is empty.. assetName:" + assetName);
+                    Debug.LogError("LoadAndInstantiateAsset:setName get is empty.. assetName:" + assetName);
                 }
             }
             else
             {
-                Logger.Error("LoadAndInstantiateAsset:GetAssetOwnerInfo fail.. assetName:" + assetName);
+                Debug.LogError("LoadAndInstantiateAsset:GetAssetOwnerInfo fail.. assetName:" + assetName);
             }
 
             return null;

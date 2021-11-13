@@ -150,7 +150,7 @@ namespace HengDao
                 }
                 else
                 {
-                    Logger.Error("No type " + name);
+                    Debug.LogError("No type " + name);
                     return null;
                 }
             }
@@ -212,7 +212,7 @@ namespace HengDao
             }
             else
             {
-                Logger.Error("No type " + name);
+                Debug.LogError("No type " + name);
                 return null;
             }
         }
