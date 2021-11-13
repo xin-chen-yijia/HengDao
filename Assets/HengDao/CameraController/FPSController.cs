@@ -108,8 +108,8 @@ namespace HengDao
 
         private void GetInput(out float speed)
         {
-            float horizontal = EInput.GetAxis(InputAxisName.Horizontal);
-            float vertical = EInput.GetAxis(InputAxisName.Vertical);
+            float horizontal = Input.GetAxis("Horizontal");
+            float vertical = Input.GetAxis("Vertical");
 
             m_isWalking = !Input.GetKey(KeyCode.LeftShift);
             speed = m_isWalking ? m_walkSpeed : m_runSpeed;
