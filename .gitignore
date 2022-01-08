@@ -12,6 +12,9 @@ obj
 # build
 *.apk
 
+# mac
+*.DS_Store
+
 # exe
 *.exe
 *_data
