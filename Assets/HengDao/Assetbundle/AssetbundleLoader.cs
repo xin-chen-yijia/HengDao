@@ -96,6 +96,20 @@ namespace HengDao
             return null;
         }
 
+        public void LoadSceneAsyn(string scene, System.Action onLoaded)
+        {
+            scene += ".unity";
+            string setName, bundleName;
+            if (!AssetBundleSetUtil.GetAssetOwnerInfo(scene, out setName, out bundleName))
+            {
+                return;
+            }
+            LoadAssetBundleAsyn(bundleName, (AssetBundle bundle) =>
+            {
+                onLoaded?.Invoke();
+            });
+        }
+
         public void LoadBundle(string bundleName)
         {
             string setName = AssetBundleSetUtil.GetSetNameWithBundle(bundleName);
@@ -193,20 +207,6 @@ namespace HengDao
             }
 
             onLoadedAssetBundle?.Invoke(ab.assetBundle);
-        }
-
-        public void LoadScene(string scene, System.Action onLoaded)
-        {
-            scene += ".unity";
-            string setName, bundleName;
-            if(!AssetBundleSetUtil.GetAssetOwnerInfo(scene,out setName,out bundleName))
-            {
-                return;
-            }
-            LoadAssetBundleAsyn(bundleName, (AssetBundle bundle)=>
-            {
-                onLoaded();
-            });
         }
 
         private string WrapAssetBundlePath(string bundleName)

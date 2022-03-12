@@ -8,7 +8,10 @@ public class CoroutineExample : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDo(new WaitForEndOfFrame(),
+        CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDo(()=>
+        {
+            return new WaitForEndOfFrame();
+        },
         ()=>
         {
             print("hello");

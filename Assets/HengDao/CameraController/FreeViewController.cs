@@ -76,6 +76,9 @@ public class FreeViewController : MonoBehaviour
             //trans_.position = trans_.position + v - trans_.forward * viewCenterDis_;
             //transform.rotation = transform.rotation * Quaternion.Euler(yAngle, -xAngle, 0);
 
+            xAngle = Mathf.Clamp(xAngle, -30, 30);
+            yAngle = Mathf.Clamp(yAngle, -10, 10);
+
             parentTrans_.rotation = Quaternion.Euler(0, xAngle, 0) * parentTrans_.rotation;
             parentTrans_.Rotate(yAngle, 0, 0, Space.Self);
         }

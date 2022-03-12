@@ -25,5 +25,6 @@ namespace HengDao
         {
             return new GameObject() as T;
         }
+
     }
 }

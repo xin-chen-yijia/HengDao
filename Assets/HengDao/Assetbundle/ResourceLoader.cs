@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace HengDao
 {
@@ -56,7 +57,7 @@ namespace HengDao
         public void LoadAsync<T>(string assetName, System.Action<T> onLoaded) where T : UnityEngine.Object
         {
             ResourceRequest aysnOp = Resources.LoadAsync<T>(assetName);
-            CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDo(aysnOp, ()=>
+            CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDo(()=>aysnOp, ()=>
             {
                 onLoaded(aysnOp.asset as T);
             }));
@@ -75,6 +76,7 @@ namespace HengDao
 
             return null;
         }
+
     }
 
 }

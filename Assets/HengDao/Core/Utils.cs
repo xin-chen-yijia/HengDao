@@ -14,13 +14,10 @@ namespace HengDao
         public delegate bool BoolDelegate();
         public delegate YieldInstruction YieldInstructionCreateDelegate();
 
-        public static IEnumerator WaitForAndDo(YieldInstruction inst,System.Action action=null)
+        public static IEnumerator WaitForAndDo(YieldInstructionCreateDelegate inst,System.Action action=null)
         {
-            yield return inst;
-            if(action != null)
-            {
-                action();
-            }
+            yield return inst();
+            action?.Invoke();    
         }
 
         public static IEnumerator WaitForAndDoLoop(YieldInstructionCreateDelegate instfunc,BoolDelegate boolFunc,System.Action action,System.Action breakFun=null)

@@ -2,6 +2,7 @@
 .vs
 *.sln
 *.csproj
+*.vsconfig
 
 # unity
 Temp

@@ -40,7 +40,6 @@ namespace HengDao
 
         public static void LoadFromAB(string scene, System.Action onBeginLoadingHandle=null, System.Action<float> updateHandle = null, System.Action completeHandle = null)
         {
-            SceneManager.LoadScene("Loading");
             if(onBeginLoadingHandle!=null)
             {
                 onBeginLoadingHandle();
@@ -54,7 +53,7 @@ namespace HengDao
                 loader.LoadAssetBundleAsyn(bundleName, (v) =>
                 {
                     AsyncOperation opr = SceneManager.LoadSceneAsync(scene);
-                    CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDo(opr,null));
+                    CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDo(()=>opr,null));
                     CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDoLoop(() =>
                     {
                         return new WaitForEndOfFrame();
