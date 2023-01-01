@@ -10,31 +10,6 @@ namespace HengDao
 {
     public static class Utils
     {
-
-        public delegate bool BoolDelegate();
-        public delegate YieldInstruction YieldInstructionCreateDelegate();
-
-        public static IEnumerator WaitForAndDo(YieldInstructionCreateDelegate inst,System.Action action=null)
-        {
-            yield return inst();
-            action?.Invoke();    
-        }
-
-        public static IEnumerator WaitForAndDoLoop(YieldInstructionCreateDelegate instfunc,BoolDelegate boolFunc,System.Action action,System.Action breakFun=null)
-        {
-            while(boolFunc())
-            {
-                yield return instfunc();
-                action();
-            }
-
-            if(breakFun != null)
-            {
-                breakFun();
-                Debug.Log("break:" + breakFun);
-            }
-        }
-
         public static Transform FindRecursive(this Transform transform,string child)
         {
             if(transform.name == child)

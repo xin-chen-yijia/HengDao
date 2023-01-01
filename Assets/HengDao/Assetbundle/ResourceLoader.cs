@@ -57,10 +57,18 @@ namespace HengDao
         public void LoadAsync<T>(string assetName, System.Action<T> onLoaded) where T : UnityEngine.Object
         {
             ResourceRequest aysnOp = Resources.LoadAsync<T>(assetName);
-            CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDo(()=>aysnOp, ()=>
+            CoroutineLauncher.current.StartCoroutine(WaitLoadedAsset(aysnOp, ()=>
             {
                 onLoaded(aysnOp.asset as T);
             }));
+        }
+
+        IEnumerator WaitLoadedAsset(YieldInstruction op,System.Action OnLoaded)
+        {
+            yield return op;
+
+            OnLoaded();
+
         }
 
         public T LoadAndInstantiate<T>(string assetName, string instantiateName = "", Transform parent = null) where T : Object

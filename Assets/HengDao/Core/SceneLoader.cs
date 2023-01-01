@@ -8,36 +8,47 @@ namespace HengDao
 {
     public class SceneLoader
     {
+        static IEnumerator UpdateLoadSceneStatus(AsyncOperation opr, System.Action<float> updateHandle, System.Action completeHandle)
+        {
+            while (!opr.isDone)
+            {
+                yield return new WaitForSeconds(0.1f);
+
+                if (updateHandle != null)
+                {
+                    updateHandle(opr.progress);
+                }
+            }
+
+            if (completeHandle != null)
+            {
+                completeHandle();
+            }
+        }
+
+        /// <summary>
+        /// load scene in build setting scene list
+        /// </summary>
+        /// <param name="scene"></param>
+        /// <param name="updateHandle"></param>
+        /// <param name="completeHandle"></param>
         public static void Load(string scene, System.Action<float> updateHandle = null, System.Action completeHandle = null)
         {
             if (!string.IsNullOrEmpty(scene))
             {
                 AsyncOperation opr = SceneManager.LoadSceneAsync(scene);
-                CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDoLoop(() =>
-                {
-                    return new WaitForSeconds(0.1f);
-                },
-                () =>
-                {
-                    return !opr.isDone;
-                },
-                () =>
-                {
-                    if (updateHandle != null)
-                    {
-                        updateHandle(opr.progress);
-                    }
-                },
-                ()=>
-                {
-                    if (completeHandle != null)
-                    {
-                        completeHandle();
-                    }
-                }));
+                CoroutineLauncher.current.StartCoroutine(UpdateLoadSceneStatus(opr,updateHandle,completeHandle));
             }
         }
 
+    
+        /// <summary>
+        /// load scene from assetbundles
+        /// </summary>
+        /// <param name="scene"></param>
+        /// <param name="onBeginLoadingHandle"></param>
+        /// <param name="updateHandle"></param>
+        /// <param name="completeHandle"></param>
         public static void LoadFromAB(string scene, System.Action onBeginLoadingHandle=null, System.Action<float> updateHandle = null, System.Action completeHandle = null)
         {
             if(onBeginLoadingHandle!=null)
@@ -53,29 +64,7 @@ namespace HengDao
                 loader.LoadAssetBundleAsyn(bundleName, (v) =>
                 {
                     AsyncOperation opr = SceneManager.LoadSceneAsync(scene);
-                    CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDo(()=>opr,null));
-                    CoroutineLauncher.current.StartCoroutine(Utils.WaitForAndDoLoop(() =>
-                    {
-                        return new WaitForEndOfFrame();
-                    },
-                    () =>
-                    {
-                        return !opr.isDone;
-                    },
-                    () =>
-                    {
-                        if (updateHandle != null)
-                        {
-                            updateHandle(opr.progress);
-                        }
-                    },
-                    ()=>
-                    {
-                        if(completeHandle != null)
-                        {
-                            completeHandle();
-                        }
-                    }));
+                    CoroutineLauncher.current.StartCoroutine(UpdateLoadSceneStatus(opr,updateHandle,completeHandle));
                 });
             }
         }
