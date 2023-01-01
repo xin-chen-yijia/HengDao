@@ -27,7 +27,7 @@ namespace HengDao
         {
             if(cached_.Count == 0)
             {
-                Debug.LogError("There no more " + typeof(T).Name + " to assign.");
+                HengDao.Logger.Error("There no more " + typeof(T).Name + " to assign.");
                 // return instantiateFunc_();
                 return default(T);
             }

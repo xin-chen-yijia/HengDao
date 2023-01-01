@@ -26,8 +26,11 @@ public class FreeViewController : MonoBehaviour
             GameObject empty = new GameObject("CameraParent");
             parentTrans_ = empty.transform;
 
+            Quaternion tmpRot = trans_.rotation;
+            trans_.rotation = Quaternion.identity;
             parentTrans_.position = trans_.position + trans_.forward * viewCenterDis_;
             trans_.SetParent(parentTrans_);
+            empty.transform.rotation = tmpRot;
 
             if(destroyOnLoad)
             {
@@ -60,12 +63,12 @@ public class FreeViewController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Q))
         {
-            parentTrans_.Translate(0.0f, Time.deltaTime * moveSpeed, 0.0f, Space.World);
+            parentTrans_.Translate(0.0f, -Time.deltaTime * moveSpeed, 0.0f, Space.Self);
         }
 
         if (Input.GetKey(KeyCode.E))
         {
-            parentTrans_.Translate(0.0f, -Time.deltaTime * moveSpeed, 0.0f, Space.World);
+            parentTrans_.Translate(0.0f, Time.deltaTime * moveSpeed, 0.0f, Space.Self);
         }
 
         if (Input.GetMouseButton(1))
@@ -76,7 +79,7 @@ public class FreeViewController : MonoBehaviour
             //trans_.position = trans_.position + v - trans_.forward * viewCenterDis_;
             //transform.rotation = transform.rotation * Quaternion.Euler(yAngle, -xAngle, 0);
 
-            xAngle = Mathf.Clamp(xAngle, -30, 30);
+            xAngle = Mathf.Clamp(xAngle, -10, 30);
             yAngle = Mathf.Clamp(yAngle, -10, 10);
 
             parentTrans_.rotation = Quaternion.Euler(0, xAngle, 0) * parentTrans_.rotation;

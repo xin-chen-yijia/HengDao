@@ -10,6 +10,7 @@ namespace HengDao
 {
     public static class Utils
     {
+
         public static Transform FindRecursive(this Transform transform,string child)
         {
             if(transform.name == child)
@@ -28,7 +29,7 @@ namespace HengDao
             return null;
         }
 
-        public static void DontDestroyOnLoad(GameObject obj)
+        public static void DontDestroyRootOnLoad(GameObject obj)
         {
             Transform t = obj.transform;
             while(t.parent)

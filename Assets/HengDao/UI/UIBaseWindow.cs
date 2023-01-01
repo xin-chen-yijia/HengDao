@@ -14,12 +14,12 @@ namespace HengDao
     public class UIBaseWindow
     {
 
-        protected Transform mRootTrans;
+        protected Transform rootTrans_;
         public RectTransform rootTrans
         {
             get
             {
-                return mRootTrans as RectTransform;
+                return rootTrans_ as RectTransform;
             }
         }
 
@@ -36,58 +36,36 @@ namespace HengDao
 
         }
 
-        //public bool LoadPrefab()
-        //{
-        //    //从AB包加载
-        //    GameObject obj = ServiceLocator.GetABLoader().LoadAndInstantiate<GameObject>(prefab, prefab);
-        //    if (obj != null)
-        //    {
-        //        mRootTrans = obj.transform;
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
-
-        public virtual void Init(Transform root)
+        public void SetRootTrans(Transform root)
         {
-            mRootTrans = root;
+            rootTrans_ = root;
+        }
+
+        public virtual void Init()
+        {
         }
 
         public virtual bool isShow
         {
             get
             {
-                return mRootTrans.gameObject.activeSelf;
+                return rootTrans_.gameObject.activeSelf;
             }
         }
 
         public virtual void Show()
         {
-            mRootTrans.gameObject.SetActive(true);
+            rootTrans_.gameObject.SetActive(true);
         }
 
         public virtual void Hide()
         {
-            mRootTrans.gameObject.SetActive(false);
+            rootTrans_.gameObject.SetActive(false);
         }
 
-        public virtual void SetPosition(Vector3 position, CanvasType type=CanvasType.Overlay)
+        public virtual void SetPosition(Vector3 position)
         {
-            switch(type)
-            {
-                case CanvasType.Overlay:
-                    mRootTrans.localPosition = position;
-                    break;
-                case CanvasType.Screen:
-                    mRootTrans.localPosition = position;
-                    break;
-                case CanvasType.World:
-                    mRootTrans.position = position;
-                    break;
-                default:
-                    break;
-            }
+            rootTrans_.localPosition = position;
         }
     }
 }

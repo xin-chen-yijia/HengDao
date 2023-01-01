@@ -10,7 +10,6 @@ public class InfiniteScrollView
     private LinkedList<ScrollItem> linkList_ = null;
     private int contentCount_ = 0;
     private float itemHeight_ = 0.0f;
-    private bool isVertical = false;
 
     private UnityEngine.Events.UnityAction<Vector2> onScroll_;
     
@@ -55,7 +54,6 @@ public class InfiniteScrollView
         isv.itemPrefab_ = itemPrefab;
         isv.updateItemContentFunc_ = updateFunc;
         isv.contentCount_ = contentCount;
-        isv.isVertical = true;
 
         var scrollTrans = scrollRect.GetComponent<RectTransform>();
         var contentTrans = scrollRect.content.GetComponent<RectTransform>();
@@ -191,7 +189,6 @@ public class InfiniteScrollView
         isv.itemPrefab_ = itemPrefab;
         isv.updateItemContentFunc_ = updateFunc;
         isv.contentCount_ = contentCount;
-        isv.isVertical = false;
 
         var scrollTrans = scrollRect.GetComponent<RectTransform>();
         var contentTrans = scrollRect.content.GetComponent<RectTransform>();

@@ -6,39 +6,37 @@ using HengDao;
 namespace HengDao
 {
     [RequireComponent(typeof(CharacterController))]
-    public class FirstPlayerController : MonoBehaviour
+    public class FPSPlayerController : MonoBehaviour
     {
 
-        private bool m_jump;
-        private bool m_isJumping;
-        [SerializeField]
-        private bool m_isWalking;
-        private bool m_previouslyGrounded;
+        private bool jumpFlag_;
+        private bool isJumping_;
+        private bool isWalking_;
+        private bool previouslyGrounded_;
 
         [SerializeField]
-        private float m_walkSpeed = 5;
+        private float walkSpeed_ = 5;
         [SerializeField]
-        private float m_runSpeed = 10;
+        private float runSpeed_ = 10;
         [SerializeField]
-        private float m_jumpSpeed = 10;
-
-        [SerializeField]
-        private float m_stickToGroundForce = 10;
+        private float jumpHeight_ = 10;
 
         [SerializeField]
-        private float m_gravityMultiplier = 2;
+        private float stickToGroundForce_ = 10;
 
-        private Vector2 m_input;
-        private Vector3 m_moveDir;
+        [SerializeField]
+        private float gravityMultiplier_ = 2;
 
-        private CharacterController m_characterController;
+        private Vector3 moveDir_;
 
-        private CollisionFlags m_collisionFlags;
+        private CharacterController characterController_;
 
-        private EMouseLook m_mouseLook;
-        private Transform m_camera;
+        private CollisionFlags collisionFlags_;
 
-        private Animation mAnimation;
+        private EMouseLook mouseLook_;
+        private Transform camera_;
+
+        private Animation animation_;
 
         private bool m_isIdle = true;
         private bool m_isRunning = false;
@@ -46,100 +44,89 @@ namespace HengDao
         // Use this for initialization
         void Start()
         {
-            m_jump = false;
-            m_characterController = GetComponent<CharacterController>();
-            m_camera = transform.GetComponentInChildren<Camera>().transform;
+            jumpFlag_ = false;
+            characterController_ = GetComponent<CharacterController>();
+            camera_ = transform.GetComponentInChildren<Camera>().transform;
 
-            m_mouseLook = new EMouseLook();
-            m_mouseLook.Init(transform, m_camera);
-            m_mouseLook.SetCursorLock(false);
+            mouseLook_ = new EMouseLook();
+            mouseLook_.Init(transform, camera_);
+            mouseLook_.SetCursorLock(false);
 
-            mAnimation = GetComponentInChildren<Animation>();
+            animation_ = GetComponentInChildren<Animation>();
         }
 
         // Update is called once per frame
         void Update()
         {
-            if (!m_jump)
+            if (!jumpFlag_)
             {
-                m_jump = Input.GetKeyDown(KeyCode.Space);
+                jumpFlag_ = EInput.GetJumpStatus();
             }
 
-            if (!m_previouslyGrounded && m_characterController.isGrounded)
+            if (!previouslyGrounded_ && characterController_.isGrounded)
             {
-                m_moveDir.y = 0;
-                m_isJumping = false;
+                moveDir_.y = 0;
+                isJumping_ = false;
             }
 
-            if (!m_characterController.isGrounded && !m_isJumping && m_previouslyGrounded)
+            if (!characterController_.isGrounded && !isJumping_ && previouslyGrounded_)
             {
-                m_moveDir.y = 0;
+                moveDir_.y = 0;
             }
 
-            m_previouslyGrounded = m_characterController.isGrounded;
+            previouslyGrounded_ = characterController_.isGrounded;
 
             if (Input.GetMouseButton(0))
             {
-                m_mouseLook.LookRotation(transform, m_camera);
+                mouseLook_.LookRotation(transform, camera_);
             }
         }
 
         private void FixedUpdate()
         {
             float speed;
-            GetInput(out speed);
+            float horizontal = EInput.GetAxis(InputAxisName.Horizontal);
+            float vertical = EInput.GetAxis(InputAxisName.Vertical);
 
-            Vector3 desiredMove = transform.forward * m_input.y + transform.right * m_input.x;
+            isWalking_ = !Input.GetKey(KeyCode.LeftShift);
+            speed = isWalking_ ? walkSpeed_ : runSpeed_;
+            Vector2 move = new Vector2(horizontal, vertical);
+            move.Normalize();
+
+            Vector3 desiredMove = transform.forward * move.y + transform.right * move.x;
 
             RaycastHit hitInfo;
-            Physics.SphereCast(transform.position, m_characterController.radius, Vector3.down, out hitInfo,
-                m_characterController.height / 2, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+            Physics.SphereCast(transform.position, characterController_.radius, Vector3.down, out hitInfo,
+                characterController_.height / 2, Physics.AllLayers, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
-            m_moveDir.x = desiredMove.x * speed;
-            m_moveDir.z = desiredMove.z * speed;
+            moveDir_.x = desiredMove.x * speed;
+            moveDir_.z = desiredMove.z * speed;
 
-            if (m_characterController.isGrounded)
+            if (characterController_.isGrounded)
             {
-                m_moveDir.y = -m_stickToGroundForce;
-                if (m_jump)
+                moveDir_.y = -stickToGroundForce_;
+                if (jumpFlag_)
                 {
-                    m_moveDir.y = m_jumpSpeed;
-                    m_jump = false;
-                    m_isJumping = true;
+                    moveDir_.y = jumpHeight_;
+                    jumpFlag_ = false;
+                    isJumping_ = true;
                 }
             }
             else
             {
-                m_moveDir += Physics.gravity * m_gravityMultiplier * Time.fixedDeltaTime;
+                moveDir_ += Physics.gravity * gravityMultiplier_ * Time.fixedDeltaTime;
             }
 
-            UpdateAnimation(m_moveDir);
-            m_collisionFlags = m_characterController.Move(m_moveDir * Time.fixedDeltaTime);
-        }
-
-        private void GetInput(out float speed)
-        {
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
-
-            m_isWalking = !Input.GetKey(KeyCode.LeftShift);
-            speed = m_isWalking ? m_walkSpeed : m_runSpeed;
-            m_input = new Vector2(horizontal, vertical);
-
-            if (m_input.sqrMagnitude > 1)
-            {
-                m_input.Normalize();
-            }
-
-
+            UpdateAnimation(moveDir_);
+            collisionFlags_ = characterController_.Move(moveDir_ * Time.fixedDeltaTime);
         }
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
         {
             Rigidbody body = hit.collider.attachedRigidbody;
             //dont move the rigidbody if the character is on top of it
-            if (m_collisionFlags == CollisionFlags.Below)
+            if (collisionFlags_ == CollisionFlags.Below)
             {
                 return;
             }
@@ -148,12 +135,12 @@ namespace HengDao
             {
                 return;
             }
-            body.AddForceAtPosition(m_characterController.velocity * 0.1f, hit.point, ForceMode.Impulse);
+            body.AddForceAtPosition(characterController_.velocity * 0.1f, hit.point, ForceMode.Impulse);
         }
 
         void UpdateAnimation(Vector3 move)
         {
-            if(mAnimation == null)
+            if(animation_ == null)
             {
                 return;
             }
@@ -162,7 +149,7 @@ namespace HengDao
             {
                 if(m_isIdle)
                 {
-                    mAnimation.CrossFade("run");
+                    animation_.CrossFade("run");
                     m_isRunning = true;
                     m_isIdle = false;
                 }
@@ -171,7 +158,7 @@ namespace HengDao
             {
                 if(m_isRunning)
                 {
-                    mAnimation.CrossFade("idle");
+                    animation_.CrossFade("idle");
                     m_isRunning = false;
                     m_isIdle = true;
                 }
