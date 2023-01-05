@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEditorInternal;
 using System.IO;
 
 using HengDao;
 
 public class AssetbundleExport {
 
-    const string AssetbundlesBuildStr = "AssetbundlesBuild";
+    const string kAssetbundlesBuildStr = "AssetbundlesBuild";
+    const string kHengDaoABPathStr = "HengDaoABPath";
 
     /// <summary>
     /// 构建Assetbundle
@@ -23,16 +25,20 @@ public class AssetbundleExport {
     [MenuItem("Tool/HengDao/build AB")]
     public static void BuildAssetBundles()
     {
-        string cache = PlayerPrefs.GetString("ABPath", string.Empty);
+        string cache = PlayerPrefs.GetString(kHengDaoABPathStr, string.Empty);
         cache = string.IsNullOrEmpty(cache) ? "./" : cache;
         string path = EditorUtility.OpenFolderPanel("Build Assetbundle", cache, "");
         if (!string.IsNullOrEmpty(path))
         {
-            PlayerPrefs.SetString("ABPath", path);
+            PlayerPrefs.SetString(kHengDaoABPathStr, path);
             ExcuteBuildAssetbundls(path);
         }
     }
 
+    /// <summary>
+    /// name assetbundles
+    /// </summary>
+    /// <param name="prefix"></param>
     private static void AssignAssetbundleNames(string prefix="")
     {
         /// AssetbundlesBuild
@@ -40,14 +46,20 @@ public class AssetbundleExport {
         /// ---Dynamic
         /// ---Common
         /// ---其它文件夹
-        string AssetbundlesBuildDir = Path.Combine(Application.dataPath, AssetbundlesBuildStr);
+        string AssetbundlesBuildDir = Path.Combine(Application.dataPath, kAssetbundlesBuildStr);
         DirectoryInfo buildFolder = new DirectoryInfo(AssetbundlesBuildDir);
         foreach(var v in buildFolder.GetDirectories())
         {
-            AssignAssetBundleNameInFolder("AssetbundlesBuild/"+v.Name, prefix + v.Name, AssetBundleLoader.kpandaVariantName);
+            AssignAssetBundleNameInFolder("AssetbundlesBuild/"+v.Name, prefix + v.Name, AssetBundlePresets.kVariantName);
         }
     }
 
+    /// <summary>
+    /// name assetbundles in specified folder
+    /// </summary>
+    /// <param name="relativePath"></param>
+    /// <param name="assetBundleName"></param>
+    /// <param name="variantName"></param>
     private static void AssignAssetBundleNameInFolder(string relativePath,string assetBundleName, string variantName)
     {
         DirectoryInfo folderInfo = new DirectoryInfo(Path.Combine(Application.dataPath, relativePath));
@@ -68,10 +80,19 @@ public class AssetbundleExport {
         }
     }
 
+    private static void WriteBuildInfoToFile(string path)
+    {
+        AssetBundleBuildInfo buildInfo = new AssetBundleBuildInfo();
+        buildInfo.version = InternalEditorUtility.GetFullUnityVersion();
+        buildInfo.versionDate = InternalEditorUtility.GetUnityVersionDate();
+        string jsonString = JsonUtility.ToJson(buildInfo);
+        File.WriteAllText(Path.Combine(path, AssetBundlePresets.kBuildInfoFileName), jsonString);
+    }
+
     [MenuItem("Tool/HengDao/Clear and build AB")]
     public static void ClearAssetbundles()
     {
-        string path = PlayerPrefs.GetString("ABPath", string.Empty);
+        string path = PlayerPrefs.GetString(kHengDaoABPathStr, string.Empty);
         if (!string.IsNullOrEmpty(path) && Directory.Exists(path))
         {
             DirectoryInfo dir = new DirectoryInfo(path);
@@ -92,11 +113,14 @@ public class AssetbundleExport {
     /// <param name="path"></param>
     private static void ExcuteBuildAssetbundls(string path)
     {
-        Debug.Log("----------Assign assetbundle names----------");
-        AssignAssetbundleNames(AssetBundleLoader.GetPrefixStr(path).ToLower());
-        Debug.Log("-----------------------start build-----------------------");
+        Debug.Log("=====Assign assetbundle names======");
+        AssignAssetbundleNames(AssetBundleLoader.ParseABNamePrefixFromPath(path).ToLower());
+
+        Debug.Log("=====start build======");
         BuildPipeline.BuildAssetBundles(path, BuildAssetBundleOptions.None, BuildTarget.StandaloneWindows);
-        Debug.Log("-----------------------build complete--------------------");
+        WriteBuildInfoToFile(path);
+
+        Debug.Log("=====build complet=====");
     }
 
     private static string[] GetAllABScenesName()
@@ -137,10 +161,10 @@ public class AssetbundleExport {
     [MenuItem("Tool/HengDao/Build AssetBundles Folder", priority = 2000)]
     public static void BuildAssetBundleFolders()
     {
-        if (!Directory.Exists(Path.Combine(Application.dataPath, AssetbundlesBuildStr)))
+        if (!Directory.Exists(Path.Combine(Application.dataPath, kAssetbundlesBuildStr)))
         {
-            AssetDatabase.CreateFolder("Assets", AssetbundlesBuildStr);
-            AssetDatabase.CreateFolder("Assets/" + AssetbundlesBuildStr, AssetBundleLoader.kDynamicAssetBundleName);
+            AssetDatabase.CreateFolder("Assets", kAssetbundlesBuildStr);
+            AssetDatabase.CreateFolder("Assets/" + kAssetbundlesBuildStr, AssetBundlePresets.kAssetBundleName);
         }
     }
 }

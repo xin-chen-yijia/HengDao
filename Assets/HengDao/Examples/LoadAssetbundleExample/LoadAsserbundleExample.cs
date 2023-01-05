@@ -9,8 +9,16 @@ public class LoadAsserbundleExample : MonoBehaviour
     void Start()
     {
         AssetBundleLoader loader = new AssetBundleLoader();
-        loader.Init("./test/hengdao.json"); //
-        loader.Load<GameObject>("Prefabs/box");
+
+        //loader.Init("C:/Temp/test2"); // assetbundles folder
+        //loader.Init("file:///C:/Temp/test2"); // assetbundles folder
+        loader.Init("http://127.0.0.1:3333/test"); // assetbundles folder
+
+        loader.LoadAssetAsync<GameObject>("Cube",(loadedObj)=>
+        {
+            Instantiate<GameObject>(loadedObj);
+        },null);
+
     }
 
     // Update is called once per frame

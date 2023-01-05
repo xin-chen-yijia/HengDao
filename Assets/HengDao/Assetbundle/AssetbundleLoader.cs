@@ -1,17 +1,29 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEditorInternal;
 using System;
 using System.IO;
+using UnityEngine.Networking;
 
 namespace HengDao
 {
+    public class AssetBundlePresets
+    {
+        public const string kAssetBundleName = "Dynamic";
+        public const string kVariantName = "panda";
+        public const string kBuildInfoFileName = "assetbundle_build.json";
+    }
+
+    public class AssetBundleBuildInfo
+    {
+        public string version;
+        public int versionDate;
+    }
+
     //每个工程打一个assetbundle包，在这个类中要处理多个工程打的多个包，从多个包中找到具体资源加载
     public class AssetBundleLoader
     {
-        public const string kDynamicAssetBundleName = "Dynamic";
-        public const string kpandaVariantName = "panda";
 
         private string assetbundlesDir_ = string.Empty;  
         public string assetbundleDir
@@ -24,26 +36,49 @@ namespace HengDao
 
         public AssetBundleManifest mainManifest_ = null;
         public Dictionary<string, AssetBundle> loadedBundles_ = new Dictionary<string, AssetBundle>();
-        private string curVariantName_ = kpandaVariantName;
+        private string curVariantName_ = "";
 
-        private string prefix_ = "";    //名字前缀
-        private string dynamicABName = "";
+        private string abNamePrefix_ = "";    //名字前缀
+        private string dynamicABName_ = "";
 
-        public bool Init(string path)
+        private bool isAsyncRequest_ = false;    // 是否用UnityWebRequestAssetBundle加载assetbunle
+        private int assetBundleCheckedState_ =  0;    // ab包检测状态，位运算，bits[0] 表示是否检测，bits[1]表示是否有效，0表示未检测，3表示有效
+
+        public enum AssetBundleError
         {
-            if(!Directory.Exists(path))
-            {
-                HengDao.Logger.Error(path + " not exists..");
-                return false;
-            }
+            kSucess = 0,
+            kIncomplete,
+            kAssetBundleVersonOld,
+            kDownloadFail,
+        }
 
+        public bool Init(string path, string variantName= AssetBundlePresets.kVariantName)
+        {
+            curVariantName_ = variantName;
+
+            if(path.StartsWith("http://") || path.StartsWith("file:///") || path.StartsWith("www."))
+            {
+                isAsyncRequest_ = true;
+            }
+            else
+            {
+                if (!Directory.Exists(path))
+                {
+                    HengDao.Logger.Error(path + " not exists..");
+                    return false;
+                }
+            }
+            
             assetbundlesDir_ = path;
-            prefix_ = GetPrefixStr(path);
-            dynamicABName = prefix_ + kDynamicAssetBundleName.ToLower() + "." + curVariantName_;
-            string folder = Path.GetFileName(path);
-            AssetBundle ab = AssetBundle.LoadFromFile(Path.Combine(path, folder));
-            mainManifest_ = ab.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-            ab.Unload(false);
+            if(assetbundlesDir_.EndsWith("/") || assetbundlesDir_.EndsWith(@"\"))
+            {
+                assetbundlesDir_ = assetbundlesDir_.Substring(0, assetbundlesDir_.Length - 1);
+            }
+            abNamePrefix_ = ParseABNamePrefixFromPath(path);
+
+            Logger.Info("Loader' assetbundle's dir:" + assetbundleDir);
+            // dynamic assetbundle
+            dynamicABName_ = abNamePrefix_ + AssetBundlePresets.kAssetBundleName.ToLower() + "." + curVariantName_;
 
             return true;
         }
@@ -56,14 +91,16 @@ namespace HengDao
         //    //}
         //}
 
-        public void SetCurrentVariantName(string variantName)
+        public T LoadAsset<T>(string assetName) where T : UnityEngine.Object
         {
-            curVariantName_ = variantName;
-        }
-
-        public T Load<T>(string assetName) where T : UnityEngine.Object
-        {
-            string bundleName = dynamicABName; 
+#if UNITY_EDITOR
+            if(isAsyncRequest_)
+            {
+                Logger.Error("loader use UnityWebRequestAssetBundle. please use LoadAssetAsync instead.");
+                return null;
+            }
+#endif
+            string bundleName = dynamicABName_; 
             AssetBundle ab = GetOrLoadBundle(bundleName);
             if (ab != null)
             {
@@ -75,23 +112,16 @@ namespace HengDao
             return null;
         }
 
-        public void LoadAsync<T>(string assetName, System.Action<T> onLoaded) where T : UnityEngine.Object
+        public T LoadAssetAndInstantiate<T>(string assetName, string instantiateName = "", Transform parent = null) where T : UnityEngine.Object
         {
-            string bundleName = dynamicABName;
-            LoadAssetBundleAsyn(bundleName, (AssetBundle bundle) =>
+#if UNITY_EDITOR
+            if (isAsyncRequest_)
             {
-                T t = bundle.LoadAsset<T>(assetName);
-                
-                if(onLoaded != null)
-                {
-                    onLoaded(t);
-                }
-            });
-        }
-
-        public T LoadAndInstantiate<T>(string assetName, string instantiateName = "", Transform parent = null) where T : UnityEngine.Object
-        {
-            T t = Load<T>(assetName);
+                Logger.Error("loader use UnityWebRequestAssetBundle. please use LoadAssetAsync instead.");
+                return null;
+            }
+#endif
+            T t = LoadAsset<T>(assetName);
             if (t != null)
             {
                 T it = GameObject.Instantiate<T>(t,parent);
@@ -106,21 +136,30 @@ namespace HengDao
             return null;
         }
 
-        public AssetBundle LoadAssetBundle(string bundleName)
+        public void LoadAssetAsync<T>(string assetName, System.Action<T> onLoaded, System.Action<string> onError) where T : UnityEngine.Object
         {
-            bundleName = prefix_ + bundleName.ToLower() + "." + curVariantName_;
-            return GetOrLoadBundle(bundleName);
-        }
+            string bundleName = dynamicABName_;
+            CoroutineLauncher.current.StartCoroutine(GetOrLoadAssetBundleAsyn(bundleName, (AssetBundle bundle) =>
+            {
+                T t = bundle.LoadAsset<T>(assetName);
 
-        public void LoadAssetBundleAsyn(string bundleName, System.Action<AssetBundle> onLoadedAssetBundle)
-        {
-            bundleName = prefix_ + bundleName.ToLower() + "." + curVariantName_;
-            CoroutineLauncher.current.StartCoroutine(LoadAssetBundleCoroutine(bundleName, onLoadedAssetBundle));
+                if (onLoaded != null)
+                {
+                    onLoaded(t);
+                }
+            },null));
         }
 
         //具体某个assetbundle
         private AssetBundle GetOrLoadBundle(string bundleName)
         {
+            if (!mainManifest_)
+            {
+                string baseAbName = Path.GetFileName(assetbundlesDir_);
+                AssetBundle baseAb = AssetBundle.LoadFromFile(Path.Combine(assetbundlesDir_, baseAbName));
+                mainManifest_ = baseAb.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                baseAb.Unload(false);
+            }
             if (!loadedBundles_.ContainsKey(bundleName))
             {
                 string[] dps = mainManifest_.GetAllDependencies(bundleName);
@@ -135,29 +174,39 @@ namespace HengDao
             return loadedBundles_[bundleName];
         }
 
-        private IEnumerator LoadAssetBundleCoroutine(string bundleName, System.Action<AssetBundle> onLoadedAssetBundle)
+
+        public IEnumerator GetOrLoadAssetBundleAsyn(string bundleName, System.Action<AssetBundle> onLoadedAssetBundle, System.Action<string> onError)
         {
+            if (!mainManifest_)
+            {
+                string baseAbName = Path.GetFileName(assetbundlesDir_);
+                string manifestBundlePath = Path.Combine(assetbundlesDir_, baseAbName);
+                var manifestRequest = UnityEngine.Networking.UnityWebRequestAssetBundle.GetAssetBundle(manifestBundlePath, 0);
+                yield return manifestRequest.SendWebRequest();
+                Logger.Info("Loaded assetbundle:" + manifestBundlePath);
+                AssetBundle manifestBundle = UnityEngine.Networking.DownloadHandlerAssetBundle.GetContent(manifestRequest);
+                mainManifest_ = manifestBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+                manifestBundle.Unload(false);
+            }
             if (!loadedBundles_.ContainsKey(bundleName))
             {
                 string[] dps = mainManifest_.GetAllDependencies(bundleName);
                 foreach (var v in dps)
                 {
-                    yield return LoadAssetBundleCoroutine(v, (bundle)=>
-                    {
-                        Logger.Info("loaded " + bundle.name);
-                    });
+                    yield return GetOrLoadAssetBundleAsyn(v,null,null);
                 }
 
-                AssetBundleCreateRequest ab = AssetBundle.LoadFromFileAsync(System.IO.Path.Combine(assetbundlesDir_, bundleName));
-                yield return ab;
-                if (ab == null)
-                {
-                    Logger.Error("Load AssetBundle " + bundleName + " Fail...");
-                    yield break;
-                }
+                string bundlePath = System.IO.Path.Combine(assetbundlesDir_, bundleName);
+                var bundleRequest = UnityEngine.Networking.UnityWebRequestAssetBundle.GetAssetBundle(bundlePath, 0);
+                yield return bundleRequest.SendWebRequest();
+                Logger.Info("Loaded assetbundle:" + bundlePath);
+                loadedBundles_[bundleName] = UnityEngine.Networking.DownloadHandlerAssetBundle.GetContent(bundleRequest);
 
-                loadedBundles_[bundleName] = ab.assetBundle;
-                onLoadedAssetBundle?.Invoke(ab.assetBundle);
+            }
+
+            if(onLoadedAssetBundle != null)
+            {
+                onLoadedAssetBundle(loadedBundles_[bundleName]);
             }
         }
 
@@ -166,6 +215,63 @@ namespace HengDao
             foreach(var v in loadedBundles_)
             {
                 v.Value.Unload(unloadAllLoadedObjects);
+            }
+
+            loadedBundles_.Clear();
+        }
+
+        public void CheckAssetBundleValid(System.Action<AssetBundleError, string> onError)
+        {
+            CoroutineLauncher.current.StartCoroutine(CheckAssetBundleCoroutine(onError));    
+        }
+
+        private IEnumerator CheckAssetBundleCoroutine(System.Action<AssetBundleError, string> onError)
+        {
+            if(isAsyncRequest_)
+            {
+                UnityWebRequest www = UnityWebRequest.Get(assetbundlesDir_ + "/" + AssetBundlePresets.kBuildInfoFileName);
+                yield return www.SendWebRequest();
+
+                if (www.isHttpError || www.isNetworkError)
+                {
+                    Logger.Error(www.error);
+                    onError(AssetBundleError.kDownloadFail, www.error);
+                }
+                else
+                {
+                    // Show results as text
+                    var tmp = JsonUtility.FromJson<AssetBundleBuildInfo>(www.downloadHandler.text);
+                    if (tmp == null || InternalEditorUtility.GetUnityVersionDate() < tmp.versionDate)
+                    {
+                        onError?.Invoke(AssetBundleError.kAssetBundleVersonOld, "AssetBundle build info format error or build with old version:" + tmp.version);
+                    }
+                    else
+                    {
+                        onError?.Invoke(AssetBundleError.kSucess, "");
+                    }
+                }
+            }
+            else
+            {
+                yield return null;
+                string filePath = Path.Combine(assetbundlesDir_, AssetBundlePresets.kBuildInfoFileName);
+                if(File.Exists(filePath))
+                {
+                    var tmp = JsonUtility.FromJson<AssetBundleBuildInfo>(File.ReadAllText(filePath));
+                    if(tmp == null || InternalEditorUtility.GetUnityVersionDate() < tmp.versionDate)
+                    {
+                        onError?.Invoke(AssetBundleError.kAssetBundleVersonOld, "AssetBundle build info format error or build with old version:" + tmp.version);
+                    }
+                    else
+                    {
+                        onError?.Invoke(AssetBundleError.kSucess, "");
+                    }
+                }
+                else
+                {
+                    Logger.Warning(filePath + " not exists...");
+                    onError?.Invoke(AssetBundleError.kIncomplete, filePath + " not exists...");
+                }
             }
         }
 
@@ -182,7 +288,7 @@ namespace HengDao
             return res;
         }
 
-        public static string GetPrefixStr(string path)
+        public static string ParseABNamePrefixFromPath(string path)
         {
             return Path.GetFileName(path).ToLower() + "_";
         }

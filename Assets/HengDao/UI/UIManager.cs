@@ -68,7 +68,7 @@ namespace HengDao
                 if (t != null)
                 {
                     wnd = Activator.CreateInstance(t) as UIBaseWindow;
-                    GameObject obj = assetLoader_.LoadAndInstantiate<GameObject>(wnd.prefab, wnd.prefab, transform);
+                    GameObject obj = assetLoader_.LoadAssetAndInstantiate<GameObject>(wnd.prefab, wnd.prefab, transform);
                     Debug.Assert(obj);
                     wnd.SetRootTrans(obj.transform);
                     wnd.Init();
