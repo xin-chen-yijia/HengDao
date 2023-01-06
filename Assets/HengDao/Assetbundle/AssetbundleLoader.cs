@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditorInternal;
 using System;
 using System.IO;
 using UnityEngine.Networking;
@@ -18,7 +17,6 @@ namespace HengDao
     public class AssetBundleBuildInfo
     {
         public string version;
-        public int versionDate;
     }
 
     //每个工程打一个assetbundle包，在这个类中要处理多个工程打的多个包，从多个包中找到具体资源加载
@@ -239,16 +237,27 @@ namespace HengDao
                 }
                 else
                 {
-                    // Show results as text
-                    var tmp = JsonUtility.FromJson<AssetBundleBuildInfo>(www.downloadHandler.text);
-                    if (tmp == null || InternalEditorUtility.GetUnityVersionDate() < tmp.versionDate)
+                    try
                     {
-                        onError?.Invoke(AssetBundleError.kAssetBundleVersonOld, "AssetBundle build info format error or build with old version:" + tmp.version);
-                    }
-                    else
+                        // Show results as text
+                        var tmp = JsonUtility.FromJson<AssetBundleBuildInfo>(www.downloadHandler.text);
+                        int curVersion = 0;
+                        int.TryParse(Application.unityVersion.Substring(0, Application.unityVersion.IndexOf(".")), out curVersion);
+                        int abVersion = -1;
+                        int.TryParse(tmp.version.Substring(0, tmp.version.IndexOf(".")), out abVersion);
+                        if (tmp == null || abVersion < curVersion)
+                        {
+                            onError?.Invoke(AssetBundleError.kAssetBundleVersonOld, "AssetBundle build info format error or build with old version:" + tmp.version);
+                        }
+                        else
+                        {
+                            onError?.Invoke(AssetBundleError.kSucess, "");
+                        }
+                    }catch(Exception e)
                     {
-                        onError?.Invoke(AssetBundleError.kSucess, "");
+                        onError(AssetBundleError.kIncomplete, e.Message);
                     }
+                   
                 }
             }
             else
@@ -257,14 +266,25 @@ namespace HengDao
                 string filePath = Path.Combine(assetbundlesDir_, AssetBundlePresets.kBuildInfoFileName);
                 if(File.Exists(filePath))
                 {
-                    var tmp = JsonUtility.FromJson<AssetBundleBuildInfo>(File.ReadAllText(filePath));
-                    if(tmp == null || InternalEditorUtility.GetUnityVersionDate() < tmp.versionDate)
+                    try
                     {
-                        onError?.Invoke(AssetBundleError.kAssetBundleVersonOld, "AssetBundle build info format error or build with old version:" + tmp.version);
+                        var tmp = JsonUtility.FromJson<AssetBundleBuildInfo>(File.ReadAllText(filePath));
+                        int curVersion = 0;
+                        int.TryParse(Application.unityVersion.Substring(0, Application.unityVersion.IndexOf(".")), out curVersion);
+                        int abVersion = -1;
+                        int.TryParse(tmp.version.Substring(0, tmp.version.IndexOf(".")), out abVersion);
+                        if (tmp == null || abVersion < curVersion)
+                        {
+                            onError?.Invoke(AssetBundleError.kAssetBundleVersonOld, "AssetBundle build info format error or build with old version:" + tmp.version);
+                        }
+                        else
+                        {
+                            onError?.Invoke(AssetBundleError.kSucess, "");
+                        }
                     }
-                    else
+                    catch(Exception e)
                     {
-                        onError?.Invoke(AssetBundleError.kSucess, "");
+                        onError(AssetBundleError.kIncomplete, e.Message);
                     }
                 }
                 else

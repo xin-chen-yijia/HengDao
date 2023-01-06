@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using UnityEditorInternal;
 using System.IO;
 
 using HengDao;
@@ -83,8 +82,7 @@ public class AssetbundleExport {
     private static void WriteBuildInfoToFile(string path)
     {
         AssetBundleBuildInfo buildInfo = new AssetBundleBuildInfo();
-        buildInfo.version = InternalEditorUtility.GetFullUnityVersion();
-        buildInfo.versionDate = InternalEditorUtility.GetUnityVersionDate();
+        buildInfo.version = Application.unityVersion;
         string jsonString = JsonUtility.ToJson(buildInfo);
         File.WriteAllText(Path.Combine(path, AssetBundlePresets.kBuildInfoFileName), jsonString);
     }

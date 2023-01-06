@@ -10,15 +10,24 @@ public class LoadAsserbundleExample : MonoBehaviour
     {
         AssetBundleLoader loader = new AssetBundleLoader();
 
-        //loader.Init("C:/Temp/test2"); // assetbundles folder
-        //loader.Init("file:///C:/Temp/test2"); // assetbundles folder
-        loader.Init("http://127.0.0.1:3333/test"); // assetbundles folder
+        //loader.Init("C:/Temp/test"); // assetbundles folder
+        //loader.Init("http://127.0.0.1:3333/test"); // assetbundles folder
+        loader.Init("file:///C:/Temp/test"); // assetbundles folder
 
-        loader.LoadAssetAsync<GameObject>("Cube",(loadedObj)=>
+        loader.CheckAssetBundleValid((errId, errMessage) =>
         {
-            Instantiate<GameObject>(loadedObj);
-        },null);
-
+            if(errId == AssetBundleLoader.AssetBundleError.kSucess)
+            {
+                loader.LoadAssetAsync<GameObject>("Cube", (loadedObj) =>
+                {
+                    Instantiate<GameObject>(loadedObj);
+                }, null);
+            }
+            else
+            {
+                Debug.Log("errId:" + errId + " , " + errMessage);
+            }
+        });
     }
 
     // Update is called once per frame
