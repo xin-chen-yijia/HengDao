@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/HengDao/Examples/LoadAssetbundleExample/test.uss?fileID=7433441132597879392&amp;guid=e28901d86bb021445b417a5d75ddb2c4&amp;type=3#test" />
+    <ui:VisualElement name="DirBrowser" style="display: flex; flex-direction: row;">
+        <ui:TextField picking-mode="Ignore" label="AssetBundle路径：" text="&lt;assetbundle path&gt;" name="AssetbundlePath" style="width: 80%; align-items: auto; justify-content: center; flex-direction: row;" />
+        <ui:Button text="Browser" display-tooltip-when-elided="true" name="BrowserButton" style="height: 40px; width: 64px; flex-direction: row; -unity-text-align: middle-center; align-items: stretch; display: none;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="ObjectLoadParent" style="flex-direction: row; width: auto;">
+        <ui:TextField picking-mode="Ignore" label="Object:" text="&lt;object be loaded&gt;" name="ObjectPath" style="width: 80%;" />
+    </ui:VisualElement>
+    <ui:Toggle label="IsScene:" name="IsScene" style="width: auto; -unity-text-align: middle-left; overflow: hidden; justify-content: flex-start; align-items: stretch;" />
+    <ui:Button text="Load" display-tooltip-when-elided="true" name="LoadAsset" />
+    <ui:ListView focusable="true" style="height: 377px; width: 384px;" />
+</ui:UXML>

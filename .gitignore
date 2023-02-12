@@ -9,6 +9,7 @@ Temp
 Library
 Logs
 obj
+UserSettings
 
 # build
 *.apk
@@ -19,3 +20,6 @@ obj
 # exe
 *.exe
 *_data
+
+# asset build
+AssetbundlesBuild
