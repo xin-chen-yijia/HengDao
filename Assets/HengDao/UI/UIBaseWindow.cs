@@ -5,67 +5,29 @@ using System;
 
 namespace HengDao
 {
-    public enum CanvasType
+    public class UIBaseWindow : MonoBehaviour
     {
-        Overlay=0,
-        Screen,
-        World
-    }
-    public class UIBaseWindow
-    {
-
-        protected Transform rootTrans_;
-        public RectTransform rootTrans
-        {
-            get
-            {
-                return rootTrans_ as RectTransform;
-            }
-        }
-
-        public virtual string prefab
-        {
-            get
-            {
-                return GetType().Name;
-            }
-        }
-
-        public UIBaseWindow()
-        {
-
-        }
-
-        public void SetRootTrans(Transform root)
-        {
-            rootTrans_ = root;
-        }
-
-        public virtual void Init()
-        {
-        }
-
         public virtual bool isShow
         {
             get
             {
-                return rootTrans_.gameObject.activeSelf;
+                return gameObject.activeSelf;
             }
         }
 
         public virtual void Show()
         {
-            rootTrans_.gameObject.SetActive(true);
+            gameObject.SetActive(true);
         }
 
         public virtual void Hide()
         {
-            rootTrans_.gameObject.SetActive(false);
+            gameObject.SetActive(false);
         }
 
         public virtual void SetPosition(Vector3 position)
         {
-            rootTrans_.localPosition = position;
+            transform.localPosition = position;
         }
     }
 }

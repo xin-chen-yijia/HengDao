@@ -105,7 +105,8 @@ namespace HengDao
                 {
                     foreach (var name in v.assets)
                     {
-                        if (name.Contains(assetName))
+                        string fileName = name.Substring(name.LastIndexOf("/") + 1);
+                        if (fileName.Contains(assetName))
                         {
                             return v.assetbundleName;
                         }
@@ -133,7 +134,7 @@ namespace HengDao
                 return null;
             }
 #endif
-            string bundleName = GetAssetBundleWithAssetName(assetName); 
+            string bundleName = GetAssetBundleWithAssetName(assetName);
             AssetBundle ab = LoadBundle(bundleName);
             if (ab != null)
             {
@@ -193,7 +194,7 @@ namespace HengDao
             return loadedBundles_[bundleName];
         }
 
-        private async Task<AssetBundle> LoadAssetbundle_web(string path)
+        private async Task<AssetBundle> LoadAssetbundleAsync_web(string path)
         {
             var request = UnityEngine.Networking.UnityWebRequestAssetBundle.GetAssetBundle(path, 0);
             await request.SendWebRequest();
@@ -209,7 +210,7 @@ namespace HengDao
             return bundle;
         }
 
-        private async Task<AssetBundle> LoadAssetbundle_file(string path)
+        private async Task<AssetBundle> LoadAssetbundleAsync_file(string path)
         {
             var requestOp = AssetBundle.LoadFromFileAsync(path);
             await requestOp;
@@ -234,7 +235,7 @@ namespace HengDao
                 return null;
             }
 
-            System.Func<string,Task<AssetBundle>> LoadAssetbundleFunc = isWebRequest_ ? LoadAssetbundle_web : LoadAssetbundle_file;
+            System.Func<string,Task<AssetBundle>> LoadAssetbundleFunc = isWebRequest_ ? LoadAssetbundleAsync_web : LoadAssetbundleAsync_file;
 
             if (!mainManifest_)
             {

@@ -44,7 +44,7 @@ public class AssetbundleExportWindow : EditorWindow
 
         List<AssetBundleBuildPath> pathsToBuild = new List<AssetBundleBuildPath>();
 
-        // Òª´ò°üµÄÎÄ¼þ¼Ð
+        // Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½
         DirectoryInfo dirInfo = new DirectoryInfo(Application.dataPath);
         foreach (var v in dirInfo.GetDirectories())
         {
@@ -66,19 +66,19 @@ public class AssetbundleExportWindow : EditorWindow
             rootVisualElement.Add(elm);
         }
 
-        // ¹¹½¨Ñ¡Ïî
+        // ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
         string lastBuildOption = PlayerPrefs.GetString(kBuildAssetBundleOptionStr, BuildAssetBundleOptions.None.ToString());
         string[] buildAssetBundleOps = System.Enum.GetNames(typeof(BuildAssetBundleOptions));
         DropdownField opsDropdownField = new DropdownField("build options", new List<string>(buildAssetBundleOps), lastBuildOption);
         rootVisualElement.Add(opsDropdownField);
 
-        // Ä¿±êÆ½Ì¨Ñ¡Ïî
+        // Ä¿ï¿½ï¿½Æ½Ì¨Ñ¡ï¿½ï¿½
         string lastBuildTarget = PlayerPrefs.GetString(kBuildTargetStr, BuildTarget.StandaloneWindows.ToString());
         string[] targets = System.Enum.GetNames(typeof(BuildTarget));
         DropdownField targetDropdownField = new DropdownField("build target", new List<string>(targets), lastBuildTarget);
         rootVisualElement.Add(targetDropdownField);
 
-        // ²å¼þÁÐ±í
+        // ï¿½ï¿½ï¿½ï¿½Ð±ï¿½
         TextField pluginsFiled = new TextField("plugins");
         string pluginsVal = PlayerPrefs.GetString(kPluginsPlayerPrefStr,string.Empty);
         pluginsFiled.value = pluginsVal;
@@ -101,7 +101,7 @@ public class AssetbundleExportWindow : EditorWindow
         clearABToggle.value = PlayerPrefs.GetInt(kClearAssetBundlePrefStr,0) == 0;
         rootVisualElement.Add(clearABToggle);
             
-        // ¹¹½¨Assetbundle
+        // ï¿½ï¿½ï¿½ï¿½Assetbundle
         var buildBtn = new Button(() =>
         {
             string outputPath = outputFiled.value;
@@ -112,7 +112,7 @@ public class AssetbundleExportWindow : EditorWindow
             PlayerPrefs.SetString(kBuildTargetStr, targetDropdownField.value);
             PlayerPrefs.SetString(kPluginsPlayerPrefStr, pluginsFiled.value);
 
-            // ÉèÖÃAB°üÃû×Ö
+            // ï¿½ï¿½ï¿½ï¿½ABï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             Debug.Log("=====Assign assetbundle names======");
             foreach (var v in pathsToBuild)
             {
@@ -124,12 +124,17 @@ public class AssetbundleExportWindow : EditorWindow
 
             if (!string.IsNullOrEmpty(outputPath))
             {
+                if(!Directory.Exists(outputPath))
+                {
+                    Directory.CreateDirectory(outputPath);
+                }
+
                 if (clearABToggle.value)
                 {
                     AssetbundleExport.ClearAndBuildAssetbundles(outputPath);
                 }
 
-                // Ö´ÐÐ¹¹½¨
+                // Ö´ï¿½Ð¹ï¿½ï¿½ï¿½
                 Debug.Log("=====start build======");
                 AssetbundleExport.plugins = new List<string>(pluginsFiled.value.Split(";"));
                 AssetbundleExport.ExcuteBuildAssetbundls(outputPath, System.Enum.Parse<BuildAssetBundleOptions>(opsDropdownField.value),System.Enum.Parse<BuildTarget>(targetDropdownField.value));
