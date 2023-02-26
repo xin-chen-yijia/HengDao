@@ -3,23 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using HengDao;
 
-public class UIExample : MonoBehaviour
+public class AsyncUIExample : MonoBehaviour
 {
-    private AssetBundleLoader loader_;
+    private AsyncAssetBundleLoader loader_;
     // Start is called before the first frame update
     void Start()
     {
         Test();
     }
 
-    void Test()
+    async void Test()
     {
-        loader_ = new AssetBundleLoader();
+        loader_ = new AsyncAssetBundleLoader();
         loader_.Init("c:/Temp/test");
 
-        Debug.Assert(loader_.LoadAssetBundleLaunchConfig());
+        var res = await loader_.LoadAssetBundleLaunchConfig();
+        Debug.Assert(res);
 
-        UIManager uiManager = UIManager.Create(loader_);
+        var uiManager = await AsyncUIManager.Create(loader_);
         uiManager.GetWindow<TestWindow>().Show();
     }
 

@@ -12,7 +12,7 @@ namespace HengDao
     /// </summary>
     public class UIManager : MonoBehaviour
     {
-        private Dictionary<string, UIBaseWindow> windows_ = new Dictionary<string, UIBaseWindow>();
+        private Dictionary<string, UIBasePage> windows_ = new Dictionary<string, UIBasePage>();
 
 #if UI_RESOURCE_LOADER
         private ResourceLoader assetLoader_ = new ResourceLoader();
@@ -44,7 +44,7 @@ namespace HengDao
             return tmp;
         }
 
-        public T GetWindow<T>() where T : UIBaseWindow
+        public T GetWindow<T>() where T : UIBasePage
         {
             // old impl
             //Debug.Assert(assetLoader_ != null);

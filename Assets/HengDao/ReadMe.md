@@ -17,3 +17,6 @@
 
 ## UI封装
 配合Assetbundle，把UI资源放到AB中，动态加载。
+
+## LoadAssetbundleExample
+资源加载示例。

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace HengDao
 {
-    public class TestWindow : UIBaseWindow
+    public class TestWindow : UIBasePage
     {
         // Start is called before the first frame update
         void Start()

@@ -6,15 +6,16 @@ using HengDao;
 using System.Threading.Tasks;
 using UnityEngine.UIElements;
 
-public class LoadAssetbundleExample : MonoBehaviour
+public class AsyncLoadAssetbundleExample : MonoBehaviour
 {
     public UIDocument uiDoc;
 
-    private AssetBundleLoader loader_ = null;
+    private AsyncAssetBundleLoader loader_ = null;
 
     // Start is called before the first frame update
     async void Start()
     {
+        // 路径
         //loader.Init("C:/Temp/test"); // assetbundles folder
         //loader.Init("http://127.0.0.1:3333/test"); // assetbundles folder
         //loader.Init("file:///C:/Temp/test"); // assetbundles folder
@@ -33,7 +34,7 @@ public class LoadAssetbundleExample : MonoBehaviour
 
     async void LoadAssetTest(string assetsDir,string assetName,bool isScene)
     {
-        loader_ = new AssetBundleLoader();
+        loader_ = new AsyncAssetBundleLoader();
         loader_.Init(assetsDir);
 
         await loader_.LoadAssetBundleLaunchConfig();
@@ -61,7 +62,7 @@ public class LoadAssetbundleExample : MonoBehaviour
 
     async void LoadSceneTest(string assetsDir, string sceneName)
     {
-        loader_ = new AssetBundleLoader();
+        loader_ = new AsyncAssetBundleLoader();
         loader_.Init(assetsDir);
 
         await loader_.LoadAssetBundleLaunchConfig();
