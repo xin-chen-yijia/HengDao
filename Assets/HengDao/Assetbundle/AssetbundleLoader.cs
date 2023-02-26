@@ -51,13 +51,13 @@ namespace HengDao
                 assetbundlesDir_ = assetbundlesDir_.Substring(0, assetbundlesDir_.Length - 1);
             }
 
-            return true;
+            return LoadAssetBundleLaunchConfig() && CheckPluginRequirements();
         }
 
-        private string JointAssetBundleAndVariantName(string assetbundleName)
-        {
-            return assetbundleName + "." + curVariantName_;
-        }
+        //private string JointAssetBundleAndVariantName(string assetbundleName)
+        //{
+        //    return assetbundleName + "." + curVariantName_;
+        //}
 
         public string GetAssetBundleWithAssetName(string assetName)
         {
@@ -159,7 +159,7 @@ namespace HengDao
         /// 获取 assetbundle 的描述文件
         /// </summary>
         /// <returns></returns>
-        public bool LoadAssetBundleLaunchConfig()
+        private bool LoadAssetBundleLaunchConfig()
         {
             string configContent = string.Empty;
             string filePath = Path.Combine(assetbundlesDir_, AssetBundlePresets.kLauchDescFileName);
@@ -203,7 +203,7 @@ namespace HengDao
         /// 检查插件引用
         /// </summary>
         /// <returns></returns>
-        public bool CheckPluginRequirements(string path = "AssetBundlePluginRequirements")
+        private bool CheckPluginRequirements(string path = "AssetBundlePluginRequirements")
         {
             ResourceLoader loader = new ResourceLoader();
             var req = loader.Load<AssetBundlePluginRequirement>(path);

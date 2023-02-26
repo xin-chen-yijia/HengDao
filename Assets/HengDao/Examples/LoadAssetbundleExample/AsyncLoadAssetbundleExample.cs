@@ -35,14 +35,7 @@ public class AsyncLoadAssetbundleExample : MonoBehaviour
     async void LoadAssetTest(string assetsDir,string assetName,bool isScene)
     {
         loader_ = new AsyncAssetBundleLoader();
-        loader_.Init(assetsDir);
-
-        await loader_.LoadAssetBundleLaunchConfig();
-
-        if (!loader_.CheckPluginRequirements())
-        {
-            Debug.LogError("Plugins check fail.");
-        }
+        await loader_.Init(assetsDir);
 
         if (!isScene)
         {
@@ -63,14 +56,7 @@ public class AsyncLoadAssetbundleExample : MonoBehaviour
     async void LoadSceneTest(string assetsDir, string sceneName)
     {
         loader_ = new AsyncAssetBundleLoader();
-        loader_.Init(assetsDir);
-
-        await loader_.LoadAssetBundleLaunchConfig();
-
-        if (!loader_.CheckPluginRequirements())
-        {
-            Debug.LogError("Plugins check fail.");
-        }
+        await loader_.Init(assetsDir);
     }
 
     // Update is called once per frame

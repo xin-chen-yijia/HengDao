@@ -17,8 +17,6 @@ public class UIExample : MonoBehaviour
         loader_ = new AssetBundleLoader();
         loader_.Init("c:/Temp/test");
 
-        Debug.Assert(loader_.LoadAssetBundleLaunchConfig());
-
         UIManager uiManager = UIManager.Create(loader_);
         uiManager.GetWindow<TestWindow>().Show();
     }

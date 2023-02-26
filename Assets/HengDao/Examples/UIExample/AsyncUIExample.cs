@@ -15,10 +15,7 @@ public class AsyncUIExample : MonoBehaviour
     async void Test()
     {
         loader_ = new AsyncAssetBundleLoader();
-        loader_.Init("c:/Temp/test");
-
-        var res = await loader_.LoadAssetBundleLaunchConfig();
-        Debug.Assert(res);
+        var res = await loader_.Init("c:/Temp/test");
 
         var uiManager = await AsyncUIManager.Create(loader_);
         uiManager.GetWindow<TestWindow>().Show();

@@ -30,7 +30,7 @@ namespace HengDao
         private Dictionary<string, AssetBundle> loadedBundles_ = new Dictionary<string, AssetBundle>();
         private string curVariantName_ = "";
 
-        public bool Init(string path, string variantName = AssetBundlePresets.kPandaVariantName)
+        public async Task<bool> Init(string path, string variantName = AssetBundlePresets.kPandaVariantName)
         {
             if (path.StartsWith("http://") || path.StartsWith("www.") || path.StartsWith("file:///"))
             {
@@ -43,7 +43,9 @@ namespace HengDao
                 assetbundlesDir_ = assetbundlesDir_.Substring(0, assetbundlesDir_.Length - 1);
             }
 
-            return true;
+            var res = await LoadAssetBundleLaunchConfig();
+            
+            return res && CheckPluginRequirements();
         }
         public async Task<T> LoadAssetAsync<T>(string assetName) where T : UnityEngine.Object
         {
@@ -124,7 +126,7 @@ namespace HengDao
         /// 获取 assetbundle 的描述文件
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> LoadAssetBundleLaunchConfig()
+        private async Task<bool> LoadAssetBundleLaunchConfig()
         {
             string configContent = string.Empty;
             if (isWebRequest_)
@@ -192,7 +194,7 @@ namespace HengDao
         /// 检查插件引用
         /// </summary>
         /// <returns></returns>
-        public bool CheckPluginRequirements(string path = "AssetBundlePluginRequirements")
+        private bool CheckPluginRequirements(string path = "AssetBundlePluginRequirements")
         {
             ResourceLoader loader = new ResourceLoader();
             var req = loader.Load<AssetBundlePluginRequirement>(path);
